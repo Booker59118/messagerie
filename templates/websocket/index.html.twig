@@ -1,0 +1,248 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello WebsocketController!{% endblock %}
+
+{% block body %}
+<style>
+
+    *, ::before, ::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+
+    body {
+        font-family: arial;
+        height:100vh;
+    }
+
+    .chat-global {
+        width: 600px;
+        height: 700px;
+        margin: 0 auto;
+        border-radius:25px;
+        box-shadow: 0px 30px 70px 0px rgba(0,0,0,0.2);
+        display:flex;
+        justify-content:flex-end;
+        flex-direction:column;
+        position: relative;
+        top: 50px;
+    }
+
+    .nav-top{
+        width: 100%;
+        height: 70px;
+        position: absolute;
+        background: #333333;
+        color: #fff;
+        top:0px;
+        display: flex;
+        flex-direction: row;
+        justify-content:center;
+        align-items:center;
+        border-bottom: 1px solid rgba(51,51,51,0.2);
+        border-top-left-radius:25px;
+        border-top-right-radius: 25px;
+
+            } 
+
+            /***********************************messages******************************/
+    .message {
+       /* padding: 10px 5px;*/
+        margin-bottom: 10px;
+        border-bottom: solid lightgrey 1px;
+        line-height:25px;
+        
+        
+    }
+
+    #chat {
+        height: 560px;
+        width:90%;
+        overflow: auto;
+        margin-bottom: 20px;
+        margin: 0 auto; 
+        
+            
+    }
+
+    #chat::before{
+        content: '';
+        background-image:url("assets/img/logo.png");
+        background-repeat:no-repeat;
+        background-size:570px;
+        position: absolute;
+        opacity:0.3;
+        top:150px;
+        left:0px;
+        width:90%;
+        height:400px;
+        z-index:-1;
+
+    }
+
+    
+    #chat  :nth-child(odd){
+        background: #02E7D0;
+        width:50%;
+        border-radius:15px;
+        color:black;
+        padding:25px;
+        margin-left:5px;
+        word-wrap: break-word;
+        /*position: absolute;*/
+        opacity:1;
+    }
+
+    #chat :nth-child(even){
+        background: #FF6E01; 
+        width:50%;
+        border-radius:15px;
+        margin-left: 50%;
+        padding:25px;
+        color:black;
+        opacity:1;
+
+    }  
+
+/***********************************Form******************************/
+
+    .form{
+        display:flex;
+        height:55px;
+        justify-content:space-between;
+    }
+
+    .form-content{
+        display:flex;
+        flex-direction:row;
+    }
+ 
+    .form-group {
+        margin-bottom: 10px;
+        
+    }
+ 
+    input {
+        border: none;
+        padding: 13px;
+        {# margin:10px; #}
+    }
+ 
+    label {
+        display: inline-block;
+        min-width: 30px;
+    }
+
+    #sendBtn{
+        width:25%;
+        background-color:#02E7D0;
+        border-radius:15px;
+        margin-right:15px;
+        margin-bottom:5px;
+
+    }
+
+    ::placeholder {
+  color: blue;
+  font-size: 1em;
+  justify-content:center;
+  align-items:center;
+}
+ 
+   
+
+    {# #chat :nth-child(2n) {
+            background-color:#aaa;
+            display:flex;
+            justify-content:right;
+
+        } #}
+
+           
+ 
+    
+ 
+  
+</style>
+    <div class="chat-global">
+        <div class="nav-top">
+            <div class="utlisateur">
+                <p>John Doe</p>
+                <p>Active now</p>
+            </div>
+
+        </div>
+        
+        
+        <div id="chat">
+       
+        
+        </div>
+
+        <div class="form">
+            <div class="form-content">
+                <div class="form-group">
+                    {# <label for="name" ></label>  #}
+                    <input type="text" id="name" placeholder="Entrez votre nom">
+                </div>
+
+                <div class="form-group">
+                    {# <label for="message"></label>  #}
+                    <input type="text" id="message" placeholder="Entrez votre message">
+                </div>
+            </div>
+            <button type="button" id="sendBtn">Envoyer</button>
+        </div>
+    </div>
+<script>
+
+    
+    const socket = new WebSocket("ws://localhost:3001");
+ 
+    socket.addEventListener("open", function() {
+        console.log("CONNECTED");
+    });
+ 
+    function addMessage(name, message) {
+        const messageHTML = "<div class='message'>" + name + message + "</div>";
+        document.getElementById("chat").innerHTML += messageHTML
+    }
+
+ 
+    socket.addEventListener("message", function(e) {
+        console.log(e.data);
+        try
+        {
+            const message = JSON.parse(e.data);
+            addMessage(message.name, message.message);
+            
+
+        }
+        catch(e)
+        {
+            // Catch any errors
+        }
+    });
+ 
+ 
+    document.getElementById('sendBtn').addEventListener("click", function() {
+ 
+        const message = {
+            name: document.getElementById("name").value,
+            message: document.getElementById("message").value
+        };
+        
+        socket.send(JSON.stringify(message));
+        addMessage(message.name, message.message);
+
+        document.querySelector("#message").value = "";
+
+      
+
+    });
+</script>
+
+
+{% endblock %}
